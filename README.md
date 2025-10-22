@@ -1,9 +1,16 @@
 # Martian Robots
 
+Accepts grid size and robots placements with commands.
+Robots move sequentially and are marked as LOST if they go out of bounds.
+Scent markers track the last know position of a lost rover
+
+## Coding pattern
+
+Coding is done in one file for readibility and reference.
+
 ## Assumptions:
 I assume the instructions means lines from the input and the coordinates x and y. I throw an exception when these are reached
 
-## Scalability:
-I left the 2 classes uncoupled for scalablility reasons. Example: adding another command for move backwards by adding only to the Robot class
+## Next steps
 
-
+The next interation is adding a move back  

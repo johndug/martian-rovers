@@ -1,20 +1,7 @@
 <?php
-
-/**
- * Martian Rovers Simulation
- * 
- * Accepts grid size and rover placements with commands.
- * Rovers move sequentially and are marked as LOST if they go out of bounds.
- * Scent markers prevent other rovers from getting lost at the same position.
- */
-
-// Configuration constants
 const FILE_INPUT = 'input.txt';
 const DIRECTIONS = ['N', 'E', 'S', 'W']; // Listed in clockwise order
 
-/**
- * Represents a 2D position on the grid
- */
 class Position
 {
     public function __construct(
@@ -23,9 +10,6 @@ class Position
     ) {}
 }
 
-/**
- * Represents the Martian grid with boundaries
- */
 class Grid
 {
     public function __construct(
@@ -33,9 +17,6 @@ class Grid
         private int $height
     ) {}
 
-    /**
-     * Check if a position is within grid boundaries
-     */
     public function isInBounds(Position $position): bool
     {
         return $position->x >= 0 
@@ -45,9 +26,6 @@ class Grid
     }
 }
 
-/**
- * Represents a Martian rover with position, facing direction, and movement capabilities
- */
 class Robot
 {
     private Position $scentPosition;
@@ -60,9 +38,6 @@ class Robot
         private bool $lost = false,
     ) {}
 
-    /**
-     * Execute a single command (F=forward, L=left turn, R=right turn)
-     */
     public function command(string $command): void
     {
         if ($this->lost) {
@@ -70,15 +45,12 @@ class Robot
         }
 
         match ($command) {
-            'F' => $this->forward(),
-            'L' => $this->turnLeft(),
-            'R' => $this->turnRight(),
+            'F' => $this->forward(), // Move forward
+            'L' => $this->turnLeft(), // Turn left
+            'R' => $this->turnRight(), // Turn right
         };
     }
 
-    /**
-     * Get the current position and status as a formatted string
-     */
     public function position(): string
     {
         return $this->lost
@@ -86,12 +58,9 @@ class Robot
             : "{$this->position->x}, {$this->position->y}, {$this->facing}";
     }
 
-    /**
-     * Move the robot forward in its current facing direction
-     */
     private function forward(): void
     {
-        $next = clone $this->position;
+        $next = clone $this->position; // Clone the position to avoid modifying the original
 
         match ($this->facing) {
             'N' => $next->y++,
@@ -113,9 +82,6 @@ class Robot
         $this->position = $next;
     }
 
-    /**
-     * Turn the robot 90 degrees to the left
-     */
     private function turnLeft(): void
     {
         $index = array_search($this->facing, DIRECTIONS);
@@ -123,9 +89,6 @@ class Robot
         $this->facing = DIRECTIONS[$index];
     }
 
-    /**
-     * Turn the robot 90 degrees to the right
-     */
     private function turnRight(): void
     {
         $index = array_search($this->facing, DIRECTIONS);
@@ -184,5 +147,5 @@ try {
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage() . "\n";
-    exit(1);
+    die;
 }

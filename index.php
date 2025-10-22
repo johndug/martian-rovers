@@ -1,45 +1,70 @@
 <?php
 
-/* accept size of grid
- * accept rovers placement according to the grid and facing (n, e, w, s)
- * if outside of the grid lost
- * rovers finish one after the next, no running workers
+/**
+ * Martian Rovers Simulation
+ * 
+ * Accepts grid size and rover placements with commands.
+ * Rovers move sequentially and are marked as LOST if they go out of bounds.
+ * Scent markers prevent other rovers from getting lost at the same position.
  */
 
-// listed in clockwise order
+// Configuration constants
 const FILE_INPUT = 'input.txt';
-const DIRECTIONS = ['N', 'E', 'S', 'W'];
+const DIRECTIONS = ['N', 'E', 'S', 'W']; // Listed in clockwise order
 
-class Position {
-    function __construct(
+/**
+ * Represents a 2D position on the grid
+ */
+class Position
+{
+    public function __construct(
         public int $x,
         public int $y,
     ) {}
 }
 
-class Grid {
-    function __construct(
+/**
+ * Represents the Martian grid with boundaries
+ */
+class Grid
+{
+    public function __construct(
         private int $width,
         private int $height
     ) {}
 
-    public function isInBounds(Position $position): bool {
-        return $position->x >= 0 && $position->x <= $this->width && $position->y >= 0 && $position->y <= $this->height;
+    /**
+     * Check if a position is within grid boundaries
+     */
+    public function isInBounds(Position $position): bool
+    {
+        return $position->x >= 0 
+            && $position->x <= $this->width 
+            && $position->y >= 0 
+            && $position->y <= $this->height;
     }
 }
 
-class Robot {
+/**
+ * Represents a Martian rover with position, facing direction, and movement capabilities
+ */
+class Robot
+{
     private Position $scentPosition;
     private static array $scents = [];
 
-    function __construct(
+    public function __construct(
         private Position $position,
         private string $facing,
         private Grid $grid,
-        private $lost = false,
+        private bool $lost = false,
     ) {}
 
-    public function command(string $command): void {
+    /**
+     * Execute a single command (F=forward, L=left turn, R=right turn)
+     */
+    public function command(string $command): void
+    {
         if ($this->lost) {
             return;
         }
@@ -51,17 +76,25 @@ class Robot {
         };
     }
 
-    public function position(): string {
-        return $this->lost ?
-            "{$this->scentPosition->x}, {$this->scentPosition->y}, {$this->facing} LOST" :
-            "{$this->position->x}, {$this->position->y}, {$this->facing}";
+    /**
+     * Get the current position and status as a formatted string
+     */
+    public function position(): string
+    {
+        return $this->lost
+            ? "{$this->scentPosition->x}, {$this->scentPosition->y}, {$this->facing} LOST"
+            : "{$this->position->x}, {$this->position->y}, {$this->facing}";
     }
 
-    private function forward(): void {
+    /**
+     * Move the robot forward in its current facing direction
+     */
+    private function forward(): void
+    {
         $next = clone $this->position;
 
         match ($this->facing) {
-            'N' => $next->y++, 
+            'N' => $next->y++,
             'E' => $next->x++,
             'W' => $next->x--,
             'S' => $next->y--,
@@ -80,48 +113,63 @@ class Robot {
         $this->position = $next;
     }
 
-    private function turnLeft(): void {
+    /**
+     * Turn the robot 90 degrees to the left
+     */
+    private function turnLeft(): void
+    {
         $index = array_search($this->facing, DIRECTIONS);
         $index = ($index - 1 + 4) % 4;
         $this->facing = DIRECTIONS[$index];
     }
 
-    private function turnRight(): void {
+    /**
+     * Turn the robot 90 degrees to the right
+     */
+    private function turnRight(): void
+    {
         $index = array_search($this->facing, DIRECTIONS);
         $index = ($index + 1) % 4;
         $this->facing = DIRECTIONS[$index];
     }
 }
 
+try {
+    $instructions = file(FILE_INPUT, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    
+    if (empty($instructions)) {
+        throw new Exception("Input file is empty");
+    }
 
-$instructions = file(FILE_INPUT, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    // Parse grid dimensions
+    [$width, $height] = explode(" ", $instructions[0]);
+    
+    if ($width > 50 || $height > 50) {
+        throw new Exception("Grid dimensions must be less than 50");
+    }
 
-// Parse grid dimensions
-[$width, $height] = explode(" ", $instructions[0]);
+    $grid = new Grid((int)$width, (int)$height);
 
-if ($width > 50 || $height > 50) {
-    throw new Exception("Grid dimensions must be less than 50");
-}
+    if (count($instructions) < 3) {
+        throw new Exception("Invalid instructions - need at least grid size and one robot");
+    }
 
-$grid = new Grid((int)$width, (int)$height);
+    // Process robot data (skip first line)
+    for ($i = 1; $i < count($instructions); $i += 2) {
+        if (!isset($instructions[$i]) || !isset($instructions[$i + 1])) {
+            throw new Exception("Invalid robot data at line " . ($i + 1));
+        }
 
-if (count($instructions) < 3) {
-    throw new Exception("Invalid instructions");
-}
-
-if (strlen($instructions[1]) > 100) {
-    throw new Exception("Commands must be less than 100 chars");
-}
-
-// Process robot data (skip first line)
-for ($i = 1; $i < count($instructions); $i += 2) {
-    if (isset($instructions[$i + 1]) && isset($instructions[$i])) {
         [$x, $y, $facing] = explode(" ", $instructions[$i]);
         $commandLine = $instructions[$i + 1];
 
+        if (strlen($commandLine) > 100) {
+            throw new Exception("Commands must be less than 100 characters");
+        }
+
         $robot = new Robot(
-            new Position((int)$x, (int)$y), 
-            $facing, 
+            new Position((int)$x, (int)$y),
+            $facing,
             $grid,
         );
         
@@ -134,4 +182,7 @@ for ($i = 1; $i < count($instructions); $i += 2) {
 
         echo $robot->position() . "\n";
     }
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+    exit(1);
 }

@@ -1,0 +1,8 @@
+services:
+  martian-robots-app:
+    image: php:8.4-alpine
+    container_name: php
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: php app.php input.txt

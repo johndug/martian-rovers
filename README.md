@@ -16,13 +16,17 @@ The next interation is adding a move back
 ## Run Martian Robots
 
 Default using input.txt supplied in code
+
 ``` php app.php ```
+
 Using external text file
+
 ``` php app.php test.txt ```
 
 ## Docker Compose
 
 If you don't have php installed you might have docker. keep in mind if installing an external input file you have to file running in docker needs to be in the app root
+
 ``` docker-compose run --rm php ```
 
 ``` docker-compose run --rm php php app.php test.txt ```

@@ -98,10 +98,12 @@ class Robot
 }
 
 try {
-    $instructions = file(FILE_INPUT, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    // read arguments from command line or default to input.txt
+    $args = $argv[1] ?? FILE_INPUT;
+    $instructions = file($args, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     
     if (empty($instructions)) {
-        throw new Exception("Input file is empty");
+        throw new Exception("Input file is empty or not found");
     }
 
     // Parse grid dimensions

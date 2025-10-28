@@ -19,14 +19,14 @@ class GridTest extends TestCase
         $grid = new Grid(5, 3);
         
         // Valid positions
-        $this->assertTrue($grid->isInBounds(new Position(0, 0)));
-        $this->assertTrue($grid->isInBounds(new Position(5, 3)));
-        $this->assertTrue($grid->isInBounds(new Position(2, 1)));
+        $this->assertTrue($grid->isInBounds(0, 0));
+        $this->assertTrue($grid->isInBounds(5, 3));
+        $this->assertTrue($grid->isInBounds(2, 1));
         
         // Invalid positions
-        $this->assertFalse($grid->isInBounds(new Position(-1, 0)));
-        $this->assertFalse($grid->isInBounds(new Position(0, -1)));
-        $this->assertFalse($grid->isInBounds(new Position(6, 3)));
-        $this->assertFalse($grid->isInBounds(new Position(5, 4)));
+        $this->assertFalse($grid->isInBounds(-1, 0));
+        $this->assertFalse($grid->isInBounds(0, -1));
+        $this->assertFalse($grid->isInBounds(6, 3));
+        $this->assertFalse($grid->isInBounds(5, 4));
     }
 }

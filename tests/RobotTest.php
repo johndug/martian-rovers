@@ -14,16 +14,11 @@ class RobotTest extends TestCase
     protected function setUp(): void
     {
         $this->grid = new Grid(5, 3);
-        // Reset static scents array for each test
-        $reflection = new \ReflectionClass(\App\Models\Robot::class);
-        $scentsProperty = $reflection->getProperty('scents');
-        $scentsProperty->setAccessible(true);
-        $scentsProperty->setValue(null, []);
     }
 
     public function testTurnLeft()
     {
-        $robot = new Robot(new Position(1, 1), 'N', $this->grid);
+        $robot = new Robot(1, 1, 'N', $this->grid);
         
         $robot->command('L');
         $this->assertEquals('1, 1, W', $robot->position());
@@ -40,7 +35,7 @@ class RobotTest extends TestCase
 
     public function testTurnRight()
     {
-        $robot = new Robot(new Position(1, 1), 'N', $this->grid);
+        $robot = new Robot(1, 1, 'N', $this->grid);
         
         $robot->command('R');
         $this->assertEquals('1, 1, E', $robot->position());
@@ -57,7 +52,7 @@ class RobotTest extends TestCase
 
     public function testMoveForward()
     {
-        $robot = new Robot(new Position(1, 1), 'N', $this->grid);
+        $robot = new Robot(1, 1, 'N', $this->grid);
         
         $robot->command('F');
         $this->assertEquals('1, 2, N', $robot->position());
@@ -69,7 +64,7 @@ class RobotTest extends TestCase
 
     public function testRobotLost()
     {
-        $robot = new Robot(new Position(5, 3), 'N', $this->grid);
+        $robot = new Robot(5, 3, 'N', $this->grid);
         
         $robot->command('F');
         $this->assertStringContainsString('LOST', $robot->position());
@@ -78,7 +73,7 @@ class RobotTest extends TestCase
     public function testScentPrevention()
     {
         // First robot gets lost
-        $robot = new Robot(new Position(5, 3), 'N', $this->grid);
+        $robot = new Robot(5, 3, 'N', $this->grid);
         $robot->command('F');
         $this->assertStringContainsString('LOST', $robot->position());
         $this->assertEquals('5, 3, N LOST', $robot->position()); // Not lost due to scent

@@ -6,11 +6,11 @@ const DIRECTIONS = ['N', 'E', 'S', 'W'];
 
 class Robot
 {
-    private Position $scentPosition;
-    private static array $scents = [];
+    private array $scentPosition = [];
 
     public function __construct(
-        private Position $position,
+        private int $x,
+        private int $y,
         private string $facing,
         private Grid $grid,
         private bool $lost = false,
@@ -32,32 +32,37 @@ class Robot
     public function position(): string
     {
         return $this->lost
-            ? "{$this->scentPosition->x}, {$this->scentPosition->y}, {$this->facing} LOST"
-            : "{$this->position->x}, {$this->position->y}, {$this->facing}";
+            ? "{$this->scentPosition['x']}, {$this->scentPosition['y']}, {$this->scentPosition['facing']} LOST"
+            : "{$this->x}, {$this->y}, {$this->facing}";
     }
 
     private function forward(): void
     {
-        $next = clone $this->position; // Clone the position to avoid modifying the original
+        $next = [
+            'x' => $this->x,
+            'y' => $this->y,
+            'facing' => $this->facing,
+        ];
 
         match ($this->facing) {
-            'N' => $next->y++,
-            'E' => $next->x++,
-            'W' => $next->x--,
-            'S' => $next->y--,
+            'N' => $next['y']++,
+            'E' => $next['x']++,
+            'W' => $next['x']--,
+            'S' => $next['y']--,
         };
 
-        if (!$this->grid->isInBounds($next)) {
-            $key = "{$this->position->x},{$this->position->y},{$this->facing}";
-            if (!isset(self::$scents[$key])) {
-                self::$scents[$key] = true;
+        if (!$this->grid->isInBounds($next['x'], $next['y'])) {
+            if (!$this->grid->hasScent($this->x, $this->y, $this->facing)) {
+                $this->grid->addScent($this->x, $this->y, $this->facing);
                 $this->lost = true;
-                $this->scentPosition = clone $this->position;
+                $this->scentPosition = ['x' => $this->x, 'y' => $this->y, 'facing' => $this->facing];
             }
             return;
         }
 
-        $this->position = $next;
+        $this->x = $next['x'];
+        $this->y = $next['y'];
+        $this->facing = $next['facing'];
     }
 
     private function turnLeft(): void

@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Models\Grid;
-use App\Models\Position;
 use App\Models\Robot;
 use Exception;
 
@@ -30,14 +29,14 @@ class App
                 throw new Exception("File '$args' is not a text file (MIME: $mimeType)");
             }
             
-            $instructions = file($args, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             
-            if (empty($instructions)) {
-                throw new Exception("Input file is empty or not found");
+            $handle = fopen($args, 'r');
+            if (!$handle) {
+                throw new Exception("Cannot open file: " . $args);
             }
         
             // Parse grid dimensions
-            [$width, $height] = explode(" ", $instructions[0]);
+            [$width, $height] = preg_split('/\s+/', trim($this->readFileLine($handle)));
             
             if ($width > 50 || $height > 50) {
                 throw new Exception("Grid dimensions must be less than 50");
@@ -45,25 +44,18 @@ class App
         
             $grid = new Grid((int)$width, (int)$height);
         
-            if (count($instructions) < 3) {
-                throw new Exception("Invalid instructions - need at least grid size and one robot");
-            }
-        
             // Process robot data (skip first line)
-            for ($i = 1; $i < count($instructions); $i += 2) {
-                if (!isset($instructions[$i]) || !isset($instructions[$i + 1])) {
-                    throw new Exception("Invalid robot data at line " . ($i + 1));
+            while (($line = $this->readFileLine($handle)) !== false) {
+                $line = trim($line);
+                if ($line === '') {
+                    continue;
                 }
-        
-                [$x, $y, $facing] = explode(" ", $instructions[$i]);
-                $commandLine = $instructions[$i + 1];
-        
-                if (strlen($commandLine) > 100) {
-                    throw new Exception("Commands must be less than 100 characters");
-                }
-        
+                [$x, $y, $facing] = preg_split('/\s+/', $line);
+                $commandLine = $this->readFileLine($handle);
+
                 $robot = new Robot(
-                    new Position((int)$x, (int)$y),
+                    (int)$x,
+                    (int)$y,
                     $facing,
                     $grid,
                 );
@@ -81,5 +73,10 @@ class App
             echo "Error: " . $e->getMessage() . "\n";
             die;
         }
+    }
+
+    private function readFileLine($handle): string|false
+    {
+        return fgets($handle);
     }
 }

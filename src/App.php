@@ -8,6 +8,7 @@ use Exception;
 
 class App
 {
+    private const MAX_FILE_SIZE = 10000;
     private const FILE_INPUT = 'input.txt';
     
     public function run()
@@ -29,6 +30,10 @@ class App
                 throw new Exception("File '$args' is not a text file (MIME: $mimeType)");
             }
             
+            // limit the file size to 10000 bytes
+            if (filesize($args) > self::MAX_FILE_SIZE) {
+                throw new Exception("File '$args' is too large");
+            }
             
             $handle = fopen($args, 'r');
             if (!$handle) {
@@ -47,11 +52,13 @@ class App
             // Process robot data (skip first line)
             while (($line = $this->readFileLine($handle)) !== false) {
                 $line = trim($line);
+                $commandLine = $this->readFileLine($handle);
+
                 if ($line === '') {
                     continue;
                 }
+
                 [$x, $y, $facing] = preg_split('/\s+/', $line);
-                $commandLine = $this->readFileLine($handle);
 
                 $robot = new Robot(
                     (int)$x,
